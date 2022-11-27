@@ -34,9 +34,8 @@ const employee = () => {
     };
 
     const [models, setModels] = useState(null);
-    const [products, setProducts] = useState(null);
     const [productDialog, setModelDialog] = useState(false);
-    const [deleteProductDialog, setDeleteProductDialog] = useState(false);
+    const [deleteProductDialog, setDeleteModelDialog] = useState(false);
     const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
 
     const [model, setModel] = useState(emptyModel);
@@ -73,7 +72,7 @@ const employee = () => {
     };
 
     const hideDeleteProductDialog = () => {
-        setDeleteProductDialog(false);
+        setDeleteModelDialog(false);
     };
 
     const hideDeleteProductsDialog = () => {
@@ -176,38 +175,37 @@ const employee = () => {
         setModel({ ..._model, dob: new Date(_model.dob), hiredDate: new Date(_model.hiredDate) });
     };
 
-    const confirmDeleteProduct = (product) => {
+    const confirmDeleteModel = (product) => {
         setModel(product);
-        setDeleteProductDialog(true);
+        setDeleteModelDialog(true);
     };
 
-    const deleteProduct = () => {
-        let _products = products.filter((val) => val.id !== product.id);
-        setProducts(_products);
-        setDeleteProductDialog(false);
-        setModel(emptyProduct);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
-    };
+    const deleteModel = () => {
+        axios
+            .delete(API.EMPLOYEE + model.id)
+            .then((res) => {
+                let _models = models.filter((val) => val.id !== model.id);
+                setModels(_models);
+                setDeleteModelDialog(false);
+                setModel(emptyModel);
+                DEFAULT_MESSAGES.SHOW_SUCCESSFUL_DELETED_TOAST(toast);
+            })
+            .catch(function (error) {
+                if (error.response) {
+                    // Request made and server responded
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
 
-    const findIndexById = (id) => {
-        let index = -1;
-        for (let i = 0; i < products.length; i++) {
-            if (products[i].id === id) {
-                index = i;
-                break;
-            }
-        }
-
-        return index;
-    };
-
-    const createId = () => {
-        let id = '';
-        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
+                    DEFAULT_MESSAGES.SHOW_ERROR_TOAST(toast);
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.log(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log('Error', error.message);
+                }
+            });
     };
 
     const exportCSV = () => {
@@ -219,8 +217,8 @@ const employee = () => {
     };
 
     const deleteSelectedProducts = () => {
-        let _products = products.filter((val) => !selectedProducts.includes(val));
-        setProducts(_products);
+        let _products = models.filter((val) => !selectedProducts.includes(val));
+        setModels(_products);
         setDeleteProductsDialog(false);
         setSelectedProducts(null);
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
@@ -313,7 +311,7 @@ const employee = () => {
         return (
             <>
                 <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editModel(rowData)} />
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" onClick={() => confirmDeleteProduct(rowData)} />
+                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" onClick={() => confirmDeleteModel(rowData)} />
             </>
         );
     };
@@ -337,7 +335,7 @@ const employee = () => {
     const deleteProductDialogFooter = (
         <>
             <Button label="No" icon="pi pi-times" className="p-button-text" onClick={hideDeleteProductDialog} />
-            <Button label="Yes" icon="pi pi-check" className="p-button-text" onClick={deleteProduct} />
+            <Button label="Yes" icon="pi pi-check" className="p-button-text" onClick={deleteModel} />
         </>
     );
     const deleteProductsDialogFooter = (
