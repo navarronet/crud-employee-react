@@ -82,8 +82,8 @@ const employee = () => {
 
     const saveModel = () => {
         setSubmitted(true);
-        console.log(model);
-        if (model.firstName.trim()) {
+
+        if (model.firstName.trim() || model.lastName.trim()) {
             let _models = [...models];
 
             if (model.id) {
@@ -92,8 +92,13 @@ const employee = () => {
                 axios
                     .put(API.EMPLOYEE, {
                         id: model.id,
-                        nombreTalla: model.nombreTalla,
-                        modifiedBy: 1
+                        firstName: model.firstName,
+                        lastName: model.lastName,
+                        dob: model.dob,
+                        hiredDate: model.hiredDate,
+                        salary: model.salary,
+                        email: model.email,
+                        phoneNumber: model.phoneNumber
                     })
                     .then((res) => {
                         DEFAULT_MESSAGES.SHOW_SUCCESSFUL_EDIT_TOAST(toast);
@@ -164,34 +169,6 @@ const employee = () => {
         }
     };
 
-    const saveProduct = () => {
-        setSubmitted(true);
-
-        if (model.nombreTalla.trim()) {
-            let _products = [...products];
-            let _product = { ...model };
-
-            let _models = [...models];
-            let _model = { ...model };
-
-            if (product.id) {
-                const index = findIndexById(product.id);
-
-                _products[index] = _product;
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
-            } else {
-                _product.id = createId();
-                _product.image = 'product-placeholder.svg';
-                _products.push(_product);
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
-            }
-
-            setProducts(_products);
-            setModelDialog(false);
-            setModel(emptyModel);
-        }
-    };
-
     const editModel = (_model) => {
         setModel({ ..._model });
         setModelDialog(true);
@@ -249,29 +226,6 @@ const employee = () => {
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
     };
 
-    const onCategoryChange = (e) => {
-        let _product = { ...product };
-        _product['category'] = e.value;
-        setModel(_product);
-    };
-
-    const onInputChange = (e, name) => {
-        const val = (e.target && e.target.value) || '';
-        let model = { ...model };
-        model[`${name}`] = val;
-
-        setModel(model);
-        console.log(model);
-    };
-
-    const onInputNumberChange = (e, name) => {
-        const val = e.value || 0;
-        let _model = { ...model };
-        _model[`${name}`] = val;
-
-        setModel(_model);
-    };
-
     const leftToolbarTemplate = () => {
         return (
             <React.Fragment>
@@ -289,15 +243,6 @@ const employee = () => {
                 <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} label="Import" chooseLabel="Import" className="mr-2 inline-block" />
                 <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />
             </React.Fragment>
-        );
-    };
-
-    const codeBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Code</span>
-                {rowData.code}
-            </>
         );
     };
 
@@ -360,60 +305,6 @@ const employee = () => {
             <>
                 <span className="p-column-title">Phone Number</span>
                 {rowData.phoneNumber}
-            </>
-        );
-    };
-
-    const imageBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Image</span>
-                <img src={`${contextPath}/demo/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2" width="100" />
-            </>
-        );
-    };
-
-    const salaryBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Salary</span>
-                {formatCurrency(rowData.salary)}
-            </>
-        );
-    };
-
-    const priceBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Price</span>
-                {formatCurrency(rowData.price)}
-            </>
-        );
-    };
-
-    const categoryBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Category</span>
-                {rowData.category}
-            </>
-        );
-    };
-
-    const ratingBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Reviews</span>
-                <Rating value={rowData.rating} readOnly cancel={false} />
-            </>
-        );
-    };
-
-    const statusBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Status</span>
-                <span className={`product-badge status-${rowData.inventoryStatus.toLowerCase()}`}>{rowData.inventoryStatus}</span>
             </>
         );
     };
@@ -493,13 +384,11 @@ const employee = () => {
                     <Dialog visible={productDialog} style={{ width: '450px' }} header="Employee Details" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="firstName">First Name</label>
-                            {/* <InputText id="firstName" value={model.firstName} onChange={(e) => onInputChange(e, 'firstName')} required autoFocus className={classNames({ 'p-invalid': submitted && !model.firstName })} /> */}
                             <InputText id="firstName" value={model.firstName} onChange={(e) => setModel({ ...model, firstName: e.target.value })} required autoFocus className={classNames({ 'p-invalid': submitted && !model.firstName })} />
                             {submitted && !model.firstName && <small className="p-invalid">the first name is mandatory</small>}
                         </div>
                         <div className="field">
                             <label htmlFor="lastName">Last Name</label>
-                            {/* <InputText id="lastName" value={model.lastName} onChange={(e) => onInputChange(e, 'lastName')} required className={classNames({ 'p-invalid': submitted && !model.lastName })} /> */}
                             <InputText id="lastName" value={model.lastName} onChange={(e) => setModel({ ...model, lastName: e.target.value })} required className={classNames({ 'p-invalid': submitted && !model.lastName })} />
                             {submitted && !model.lastName && <small className="p-invalid">the last name is mandatory</small>}
                         </div>
@@ -510,19 +399,16 @@ const employee = () => {
                         </div>
                         <div className="field">
                             <label htmlFor="email">Email</label>
-                            {/* <InputText id="email" value={model.email} onChange={(e) => onInputChange(e, 'email')} required className={classNames({ 'p-invalid': submitted && !model.email })} /> */}
                             <InputText id="email" value={model.email} onChange={(e) => setModel({ ...model, email: e.target.value })} required className={classNames({ 'p-invalid': submitted && !model.email })} />
                             {submitted && !model.email && <small className="p-invalid">the email is mandatory</small>}
                         </div>
                         <div className="field">
                             <label htmlFor="phoneNumber">Phone Number</label>
-                            {/* <InputText id="phoneNumber" value={model.phoneNumber} onChange={(e) => onInputChange(e, 'phoneNumber')} required className={classNames({ 'p-invalid': submitted && !model.phoneNumber })} /> */}
                             <InputText id="phoneNumber" value={model.phoneNumber} onChange={(e) => setModel({ ...model, phoneNumber: e.target.value })} required className={classNames({ 'p-invalid': submitted && !model.phoneNumber })} />
                             {submitted && !model.phoneNumber && <small className="p-invalid">the phone number is mandatory</small>}
                         </div>
                         <div className="field">
                             <label htmlFor="salary">Salary</label>
-                            {/* <InputNumber id="salary" value={model.salary} onValueChange={(e) => onInputChange(e, 'salary')} required className={classNames({ 'p-invalid': submitted && !model.salary })} /> */}
                             <InputNumber id="salary" value={model.salary} onValueChange={(e) => setModel({ ...model, salary: e.value })} required className={classNames({ 'p-invalid': submitted && !model.salary })} />
                             {submitted && !model.salary && <small className="p-invalid">the salary is mandatory</small>}
                         </div>
