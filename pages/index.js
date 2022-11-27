@@ -82,15 +82,15 @@ const employee = () => {
 
     const saveModel = () => {
         setSubmitted(true);
-
-        if (model.nombreTalla.trim()) {
+        console.log(model);
+        if (model.firstName.trim()) {
             let _models = [...models];
 
             if (model.id) {
-                const servicio = new EmployeeService();
+                const service = new EmployeeService();
 
                 axios
-                    .patch(API.EMPLOYEE, {
+                    .put(API.EMPLOYEE, {
                         id: model.id,
                         nombreTalla: model.nombreTalla,
                         modifiedBy: 1
@@ -98,7 +98,7 @@ const employee = () => {
                     .then((res) => {
                         DEFAULT_MESSAGES.SHOW_SUCCESSFUL_EDIT_TOAST(toast);
 
-                        servicio.getAll().then((data) => setModels(data));
+                        service.getAll().then((data) => setModels(data));
 
                         setModels(_models);
                         setModelDialog(false);
@@ -121,20 +121,25 @@ const employee = () => {
                         }
                     });
             } else {
-                const tallaService = new EmployeeService();
+                const service = new EmployeeService();
                 try {
                     axios
                         .post(API.EMPLOYEE, {
-                            nombreTalla: marca.nombreTalla,
-                            createdBy: 1
+                            firstName: model.firstName,
+                            lastName: model.lastName,
+                            dob: model.dob,
+                            hiredDate: model.hiredDate,
+                            salary: model.salary,
+                            email: model.email,
+                            phoneNumber: model.phoneNumber
                         })
                         .then((res) => {
                             DEFAULT_MESSAGES.SHOW_SUCCESSFUL_NEW_TOAST(toast);
-                            tallaService.getAll().then((data) => setTallaes(data));
+                            service.getAll().then((data) => setModels(data));
 
-                            setTallaes(_marcas);
-                            setTallaDialog(false);
-                            setTalla(emptyTalla);
+                            setModels(_models);
+                            setModelDialog(false);
+                            setModel(emptyModel);
                         })
                         .catch(function (error) {
                             if (error.response) {
@@ -254,7 +259,9 @@ const employee = () => {
         const val = (e.target && e.target.value) || '';
         let model = { ...model };
         model[`${name}`] = val;
+
         setModel(model);
+        console.log(model);
     };
 
     const onInputNumberChange = (e, name) => {
@@ -486,12 +493,14 @@ const employee = () => {
                     <Dialog visible={productDialog} style={{ width: '450px' }} header="Employee Details" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="firstName">First Name</label>
-                            <InputText id="firstName" value={model.firstName} onChange={(e) => onInputChange(e, 'firstName')} required autoFocus className={classNames({ 'p-invalid': submitted && !model.firstName })} />
+                            {/* <InputText id="firstName" value={model.firstName} onChange={(e) => onInputChange(e, 'firstName')} required autoFocus className={classNames({ 'p-invalid': submitted && !model.firstName })} /> */}
+                            <InputText id="firstName" value={model.firstName} onChange={(e) => setModel({ ...model, firstName: e.target.value })} required autoFocus className={classNames({ 'p-invalid': submitted && !model.firstName })} />
                             {submitted && !model.firstName && <small className="p-invalid">the first name is mandatory</small>}
                         </div>
                         <div className="field">
                             <label htmlFor="lastName">Last Name</label>
-                            <InputText id="lastName" value={model.lastName} onChange={(e) => onInputChange(e, 'lastName')} required className={classNames({ 'p-invalid': submitted && !model.lastName })} />
+                            {/* <InputText id="lastName" value={model.lastName} onChange={(e) => onInputChange(e, 'lastName')} required className={classNames({ 'p-invalid': submitted && !model.lastName })} /> */}
+                            <InputText id="lastName" value={model.lastName} onChange={(e) => setModel({ ...model, lastName: e.target.value })} required className={classNames({ 'p-invalid': submitted && !model.lastName })} />
                             {submitted && !model.lastName && <small className="p-invalid">the last name is mandatory</small>}
                         </div>
                         <div className="field">
@@ -501,17 +510,20 @@ const employee = () => {
                         </div>
                         <div className="field">
                             <label htmlFor="email">Email</label>
-                            <InputText id="email" value={model.email} onChange={(e) => onInputChange(e, 'email')} required className={classNames({ 'p-invalid': submitted && !model.email })} />
+                            {/* <InputText id="email" value={model.email} onChange={(e) => onInputChange(e, 'email')} required className={classNames({ 'p-invalid': submitted && !model.email })} /> */}
+                            <InputText id="email" value={model.email} onChange={(e) => setModel({ ...model, email: e.target.value })} required className={classNames({ 'p-invalid': submitted && !model.email })} />
                             {submitted && !model.email && <small className="p-invalid">the email is mandatory</small>}
                         </div>
                         <div className="field">
                             <label htmlFor="phoneNumber">Phone Number</label>
-                            <InputText id="phoneNumber" value={model.phoneNumber} onChange={(e) => onInputChange(e, 'phoneNumber')} required className={classNames({ 'p-invalid': submitted && !model.phoneNumber })} />
+                            {/* <InputText id="phoneNumber" value={model.phoneNumber} onChange={(e) => onInputChange(e, 'phoneNumber')} required className={classNames({ 'p-invalid': submitted && !model.phoneNumber })} /> */}
+                            <InputText id="phoneNumber" value={model.phoneNumber} onChange={(e) => setModel({ ...model, phoneNumber: e.target.value })} required className={classNames({ 'p-invalid': submitted && !model.phoneNumber })} />
                             {submitted && !model.phoneNumber && <small className="p-invalid">the phone number is mandatory</small>}
                         </div>
                         <div className="field">
                             <label htmlFor="salary">Salary</label>
-                            <InputNumber id="salary" value={model.salary} onValueChange={(e) => onInputChange(e, 'salary')} required className={classNames({ 'p-invalid': submitted && !model.salary })} />
+                            {/* <InputNumber id="salary" value={model.salary} onValueChange={(e) => onInputChange(e, 'salary')} required className={classNames({ 'p-invalid': submitted && !model.salary })} /> */}
+                            <InputNumber id="salary" value={model.salary} onValueChange={(e) => setModel({ ...model, salary: e.value })} required className={classNames({ 'p-invalid': submitted && !model.salary })} />
                             {submitted && !model.salary && <small className="p-invalid">the salary is mandatory</small>}
                         </div>
                         <div className="field">
