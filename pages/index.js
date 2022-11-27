@@ -474,9 +474,9 @@ const employee = () => {
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} employees"
                         globalFilter={globalFilter}
-                        emptyMessage="No products found."
+                        emptyMessage="No employees found."
                         header={header}
                         responsiveLayout="scroll"
                     >
@@ -559,7 +559,7 @@ const employee = () => {
                     <Dialog visible={deleteProductsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteProductsDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {model && <span>Are you sure you want to delete the selected products?</span>}
+                            {model && <span>Are you sure you want to delete the selected employees?</span>}
                         </div>
                     </Dialog>
                 </div>
