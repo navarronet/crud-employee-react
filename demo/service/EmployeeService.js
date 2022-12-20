@@ -8,7 +8,7 @@ export class EmployeeService {
     }
 
     getAll() {
-        return axios.get(API.TALLA).then((res) => res.data);
+        return axios.get(API.EMPLOYEE).then((res) => res.data);
     }
 
     getById(id) {

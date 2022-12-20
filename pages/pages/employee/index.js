@@ -6,6 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { FileUpload } from 'primereact/fileupload';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
+import { Calendar } from 'primereact/calendar';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { RadioButton } from 'primereact/radiobutton';
 import { Rating } from 'primereact/rating';
@@ -21,29 +22,23 @@ import * as API from '../../../demo/utils/Endpoints';
 import * as DEFAULT_MESSAGES from '../../../demo/utils/DefaultMessages';
 
 const employee = () => {
-    let emptyProduct = {
-        id: null,
-        name: '',
-        image: null,
-        description: '',
-        category: null,
-        price: 0,
-        quantity: 0,
-        rating: 0,
-        inventoryStatus: 'INSTOCK'
-    };
-
     let emptyModel = {
         id: null,
-        nombreTalla: ''
+        firstName: '',
+        lastName: '',
+        dob: null,
+        hiredDate: null,
+        salary: 0,
+        email: '',
+        phoneNumber: ''
     };
 
     const [models, setModels] = useState(null);
     const [products, setProducts] = useState(null);
-    const [productDialog, setProductDialog] = useState(false);
+    const [productDialog, setModelDialog] = useState(false);
     const [deleteProductDialog, setDeleteProductDialog] = useState(false);
     const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
-    const [product, setProduct] = useState(emptyProduct);
+
     const [model, setModel] = useState(emptyModel);
     const [selectedProducts, setSelectedProducts] = useState(null);
     const [submitted, setSubmitted] = useState(false);
@@ -53,12 +48,12 @@ const employee = () => {
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
 
     useEffect(() => {
-        const productService = new ProductService();
+        // const productService = new ProductService();
         const service = new EmployeeService();
 
         service.getAll().then((data) => setModels(data));
 
-        productService.getProducts().then((data) => setProducts(data));
+        // productService.getProducts().then((data) => setProducts(data));
     }, []);
 
     const formatCurrency = (value) => {
@@ -66,15 +61,15 @@ const employee = () => {
     };
 
     const openNew = () => {
-        setProduct(emptyProduct);
+        // setModel(emptyProduct);
         setModel(emptyModel);
         setSubmitted(false);
-        setProductDialog(true);
+        setModelDialog(true);
     };
 
     const hideDialog = () => {
         setSubmitted(false);
-        setProductDialog(false);
+        setModelDialog(false);
     };
 
     const hideDeleteProductDialog = () => {
@@ -106,7 +101,7 @@ const employee = () => {
                         servicio.getAll().then((data) => setModels(data));
 
                         setModels(_models);
-                        setProductDialog(false);
+                        setModelDialog(false);
                         setModel(emptyModel);
                     })
                     .catch(function (error) {
@@ -169,7 +164,7 @@ const employee = () => {
 
         if (model.nombreTalla.trim()) {
             let _products = [...products];
-            let _product = { ...product };
+            let _product = { ...model };
 
             let _models = [...models];
             let _model = { ...model };
@@ -187,20 +182,20 @@ const employee = () => {
             }
 
             setProducts(_products);
-            setProductDialog(false);
-            setProduct(emptyProduct);
+            setModelDialog(false);
+            setModel(emptyModel);
         }
     };
 
-    const editProduct = (product) => {
-        setProduct({ ...product });
-        setProductDialog(true);
+    const editModel = (_model) => {
+        setModel({ ..._model });
+        setModelDialog(true);
 
-        setModel({ ...product });
+        setModel({ ..._model, dob: new Date(_model.dob), hiredDate: new Date(_model.hiredDate) });
     };
 
     const confirmDeleteProduct = (product) => {
-        setProduct(product);
+        setModel(product);
         setDeleteProductDialog(true);
     };
 
@@ -208,7 +203,7 @@ const employee = () => {
         let _products = products.filter((val) => val.id !== product.id);
         setProducts(_products);
         setDeleteProductDialog(false);
-        setProduct(emptyProduct);
+        setModel(emptyProduct);
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
     };
 
@@ -252,24 +247,22 @@ const employee = () => {
     const onCategoryChange = (e) => {
         let _product = { ...product };
         _product['category'] = e.value;
-        setProduct(_product);
+        setModel(_product);
     };
 
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
-        let _product = { ...product };
-        _product[`${name}`] = val;
-
-        setProduct(_product);
-        setModel(_product);
+        let model = { ...model };
+        model[`${name}`] = val;
+        setModel(model);
     };
 
     const onInputNumberChange = (e, name) => {
         const val = e.value || 0;
-        let _product = { ...product };
-        _product[`${name}`] = val;
+        let _model = { ...model };
+        _model[`${name}`] = val;
 
-        setProduct(_product);
+        setModel(_model);
     };
 
     const leftToolbarTemplate = () => {
@@ -286,7 +279,7 @@ const employee = () => {
     const rightToolbarTemplate = () => {
         return (
             <React.Fragment>
-                <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} label="Import" chooseLabel="Import" className="mr-2 inline-block" />
+                {/* <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} label="Import" chooseLabel="Import" className="mr-2 inline-block" /> */}
                 <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />
             </React.Fragment>
         );
@@ -328,11 +321,38 @@ const employee = () => {
         );
     };
 
-    const nameBodyTemplate = (rowData) => {
+    const hiredDateBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Name</span>
-                {rowData.name}
+                <span className="p-column-title">Hired Date</span>
+                {rowData.hiredDate}
+            </>
+        );
+    };
+
+    const dobBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Date of Birth</span>
+                {new Date(rowData['dob']).toLocaleDateString('en-US')}
+            </>
+        );
+    };
+
+    const emailBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Email</span>
+                {rowData.email}
+            </>
+        );
+    };
+
+    const phoneNumberBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Phone Number</span>
+                {rowData.phoneNumber}
             </>
         );
     };
@@ -394,7 +414,7 @@ const employee = () => {
     const actionBodyTemplate = (rowData) => {
         return (
             <>
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editProduct(rowData)} />
+                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editModel(rowData)} />
                 <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" onClick={() => confirmDeleteProduct(rowData)} />
             </>
         );
@@ -454,10 +474,12 @@ const employee = () => {
                         responsiveLayout="scroll"
                     >
                         <Column selectionMode="multiple" headerStyle={{ width: '4rem' }}></Column>
-                        <Column field="id" header="id" sortable body={idBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                        <Column field="firstName" header="First Name" sortable body={firstNameBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                        <Column field="lastName" header="Last Name" sortable body={lastNameBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                        <Column field="salary" header="Salary" sortable body={salaryBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="id" header="id" sortable body={idBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
+                        <Column field="firstName" header="First Name" sortable body={firstNameBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
+                        <Column field="lastName" header="Last Name" sortable body={lastNameBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
+                        <Column field="dob" header="Date of Birth" sortable body={dobBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
+                        <Column field="email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
+                        <Column field="phoneNumber" header="Phone Number" sortable body={phoneNumberBodyTemplate} headerStyle={{ minWidth: '5rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -473,20 +495,48 @@ const employee = () => {
                             {submitted && !model.lastName && <small className="p-invalid">the last name is mandatory</small>}
                         </div>
                         <div className="field">
+                            <label htmlFor="dob">Date of birth</label>
+                            <Calendar id="dob" dateFormat="mm/dd/yy" value={model.dob} onChange={(e) => setModel({ ...model, dob: e.value })} required className={classNames({ 'p-invalid': submitted && !model.dob })} showIcon />
+                            {submitted && !model.dob && <small className="p-invalid">the date of birth is mandatory</small>}
+                        </div>
+                        <div className="field">
+                            <label htmlFor="email">Email</label>
+                            <InputText id="email" value={model.email} onChange={(e) => onInputChange(e, 'email')} required className={classNames({ 'p-invalid': submitted && !model.email })} />
+                            {submitted && !model.email && <small className="p-invalid">the email is mandatory</small>}
+                        </div>
+                        <div className="field">
+                            <label htmlFor="phoneNumber">Phone Number</label>
+                            <InputText id="phoneNumber" value={model.phoneNumber} onChange={(e) => onInputChange(e, 'phoneNumber')} required className={classNames({ 'p-invalid': submitted && !model.phoneNumber })} />
+                            {submitted && !model.phoneNumber && <small className="p-invalid">the phone number is mandatory</small>}
+                        </div>
+                        <div className="field">
                             <label htmlFor="salary">Salary</label>
-                            <InputText id="salary" value={model.salary} onChange={(e) => onInputChange(e, 'salary')} required className={classNames({ 'p-invalid': submitted && !model.salary })} />
+                            <InputNumber id="salary" value={model.salary} onValueChange={(e) => onInputChange(e, 'salary')} required className={classNames({ 'p-invalid': submitted && !model.salary })} />
                             {submitted && !model.salary && <small className="p-invalid">the salary is mandatory</small>}
+                        </div>
+                        <div className="field">
+                            <label htmlFor="hiredDate">Hired Date</label>
+                            <Calendar
+                                id="hiredDate"
+                                dateFormat="mm/dd/yy"
+                                value={model.hiredDate}
+                                onChange={(e) => setModel({ ...model, hiredDate: e.value })}
+                                required
+                                className={classNames({ 'p-invalid': submitted && !model.hiredDate })}
+                                showIcon
+                            />
+                            {submitted && !model.hiredDate && <small className="p-invalid">the hired date is mandatory</small>}
                         </div>
                     </Dialog>
 
                     <Dialog visible={deleteProductDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {product && (
+                            {model && (
                                 <span>
                                     Are you sure you want to delete{' '}
                                     <b>
-                                        {product.firstName} {product.lastName}
+                                        {model.firstName} {model.lastName}
                                     </b>
                                     ?
                                 </span>
@@ -497,7 +547,7 @@ const employee = () => {
                     <Dialog visible={deleteProductsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteProductsDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {product && <span>Are you sure you want to delete the selected products?</span>}
+                            {model && <span>Are you sure you want to delete the selected products?</span>}
                         </div>
                     </Dialog>
                 </div>
