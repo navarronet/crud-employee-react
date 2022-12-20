@@ -34,12 +34,12 @@ const employee = () => {
     };
 
     const [models, setModels] = useState(null);
-    const [productDialog, setModelDialog] = useState(false);
-    const [deleteProductDialog, setDeleteModelDialog] = useState(false);
-    const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
+    const [modelDialog, setModelDialog] = useState(false);
+    const [deleteModelDialog, setDeleteModelDialog] = useState(false);
+    const [deleteModelsDialog, setDeleteModelsDialog] = useState(false);
 
     const [model, setModel] = useState(emptyModel);
-    const [selectedProducts, setSelectedProducts] = useState(null);
+    const [selectedModels, setSelectedModels] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
@@ -47,12 +47,8 @@ const employee = () => {
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
 
     useEffect(() => {
-        // const productService = new ProductService();
         const service = new EmployeeService();
-
         service.getAll().then((data) => setModels(data));
-
-        // productService.getProducts().then((data) => setProducts(data));
     }, []);
 
     const formatCurrency = (value) => {
@@ -60,7 +56,6 @@ const employee = () => {
     };
 
     const openNew = () => {
-        // setModel(emptyProduct);
         setModel(emptyModel);
         setSubmitted(false);
         setModelDialog(true);
@@ -76,7 +71,7 @@ const employee = () => {
     };
 
     const hideDeleteProductsDialog = () => {
-        setDeleteProductsDialog(false);
+        setDeleteModelsDialog(false);
     };
 
     const saveModel = () => {
@@ -213,15 +208,41 @@ const employee = () => {
     };
 
     const confirmDeleteSelected = () => {
-        setDeleteProductsDialog(true);
+        setDeleteModelsDialog(true);
     };
 
     const deleteSelectedProducts = () => {
-        let _products = models.filter((val) => !selectedProducts.includes(val));
-        setModels(_products);
-        setDeleteProductsDialog(false);
-        setSelectedProducts(null);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+        // let _products = models.filter((val) => !selectedProducts.includes(val));
+        // setModels(_products);
+        // setDeleteProductsDialog(false);
+        // setSelectedProducts(null);
+        // toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+        console.log(selectedModels);
+        axios
+            .delete(API.EMPLOYEE + API.DELETE_BULK, selectedModels)
+            .then((res) => {
+                DEFAULT_MESSAGES.SHOW_SUCCESSFUL_DELETED_ALL_TOAST(toast);
+                let _models = models.filter((val) => !selectedModels.includes(val));
+                setModels(_models);
+                setDeleteModelsDialog(false);
+                setSelectedModels(null);
+            })
+            .catch(function (error) {
+                if (error.response) {
+                    // Request made and server responded
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+
+                    DEFAULT_MESSAGES.SHOW_ERROR_TOAST(toast);
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.log(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log('Error', error.message);
+                }
+            });
     };
 
     const leftToolbarTemplate = () => {
@@ -229,7 +250,7 @@ const employee = () => {
             <React.Fragment>
                 <div className="my-2">
                     <Button label="New" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-                    <Button label="Delete" icon="pi pi-trash" className="p-button-danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
+                    <Button label="Delete" icon="pi pi-trash" className="p-button-danger" onClick={confirmDeleteSelected} disabled={!selectedModels || !selectedModels.length} />
                 </div>
             </React.Fragment>
         );
@@ -238,7 +259,7 @@ const employee = () => {
     const rightToolbarTemplate = () => {
         return (
             <React.Fragment>
-                <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} label="Import" chooseLabel="Import" className="mr-2 inline-block" />
+                {/* <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} label="Import" chooseLabel="Import" className="mr-2 inline-block" /> */}
                 <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />
             </React.Fragment>
         );
@@ -355,8 +376,8 @@ const employee = () => {
                     <DataTable
                         ref={dt}
                         value={models}
-                        selection={selectedProducts}
-                        onSelectionChange={(e) => setSelectedProducts(e.value)}
+                        selection={selectedModels}
+                        onSelectionChange={(e) => setSelectedModels(e.value)}
                         dataKey="id"
                         paginator
                         rows={10}
@@ -379,7 +400,7 @@ const employee = () => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <Dialog visible={productDialog} style={{ width: '450px' }} header="Employee Details" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={modelDialog} style={{ width: '450px' }} header="Employee Details" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="firstName">First Name</label>
                             <InputText id="firstName" value={model.firstName} onChange={(e) => setModel({ ...model, firstName: e.target.value })} required autoFocus className={classNames({ 'p-invalid': submitted && !model.firstName })} />
@@ -425,7 +446,7 @@ const employee = () => {
                         </div>
                     </Dialog>
 
-                    <Dialog visible={deleteProductDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
+                    <Dialog visible={deleteModelDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                             {model && (
@@ -440,7 +461,7 @@ const employee = () => {
                         </div>
                     </Dialog>
 
-                    <Dialog visible={deleteProductsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteProductsDialog}>
+                    <Dialog visible={deleteModelsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteProductsDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                             {model && <span>Are you sure you want to delete the selected employees?</span>}
